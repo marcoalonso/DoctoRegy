@@ -71,10 +71,13 @@ struct RemindersView: View {
             } catch {
                 print("Failed to delete reminder from SwiftData: \(error)")
             }
-            
-            // 2. Eliminar la notificación pendiente asociada
-            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [reminder.id.uuidString])
+            deleteNotifications(for: reminder)
         }
+    }
+    
+    private func deleteNotifications(for reminder: Reminder) {
+        let identifiers = (0..<reminder.repeatCount).map { "\(reminder.id.uuidString)_\($0)" }
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
     }
 
     func addReminder(_ newReminder: Reminder) {
@@ -109,30 +112,46 @@ struct RemindersView: View {
     
     func scheduleReminderNotifications(for reminder: Reminder, medicationName: String) {
         let notificationCenter = UNUserNotificationCenter.current()
-        let startDate = Date()
-
+        let startDate = Date() // Fecha de inicio (ahora)
+        
         for i in 0..<reminder.repeatCount {
-            let triggerDate = startDate.addingTimeInterval(reminder.timeInterval * Double(i))
-
+            let triggerDate: Date
+            
+            // Si es el primer recordatorio, programa para 30 segundos después
+            if i == 0 {
+                triggerDate = startDate.addingTimeInterval(30)
+            } else {
+                // Los demás se programan según el intervalo
+                triggerDate = startDate.addingTimeInterval(reminder.timeInterval * Double(i))
+            }
+            
             let content = UNMutableNotificationContent()
             content.title = "\(reminder.dosage) - Suministrar: \(medicationName)"
             content.body = "Es hora de tomar tu medicamento."
-            content.sound = .default
-
+            content.sound = UNNotificationSound.default
+            
+            if content.title.isEmpty || content.body.isEmpty {
+                print("Error: Notification content is invalid")
+            }
+            
             let trigger = UNCalendarNotificationTrigger(
-                dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate),
+                dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: triggerDate),
                 repeats: false
             )
-
+            
+            print("Scheduling notification for: \(triggerDate)")
+            
             let request = UNNotificationRequest(
-                identifier: UUID().uuidString,
+                identifier: "\(reminder.id.uuidString)_\(i)", // Identificador único por instancia
                 content: content,
                 trigger: trigger
             )
-
+            
             notificationCenter.add(request) { error in
                 if let error = error {
-                    print("Failed to schedule notification: \(error)")
+                    print("Failed to schedule notification: \(error.localizedDescription)")
+                } else {
+                    print("Notification scheduled with ID: \(request.identifier)")
                 }
             }
         }
