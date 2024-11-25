@@ -79,4 +79,12 @@ class MockData {
            Medication(name: "Ibuprofen", mainSubstance: "Ibuprofen", quantity: "200mg", expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 60)),
            Medication(name: "Sensidex", mainSubstance: "Dextromethorphan", quantity: "100ml", expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 90))
        ]
+    
+    static let sampleReminder = Reminder(
+            id: UUID(),
+            medicationId: UUID(),
+            dosage: "2.5 ml",
+            timeInterval: 8 * 3600,
+            repeatCount: 15
+        )
 }

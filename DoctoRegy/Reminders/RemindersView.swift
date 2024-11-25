@@ -17,14 +17,16 @@ struct RemindersView: View {
         NavigationView {
             List {
                 ForEach(reminders) { reminder in
-                    VStack(alignment: .leading) {
-                        if let medicationName = getMedicationName(for: reminder.medicationId) {
-                            Text("\(reminder.dosage) - Suministrar: \(medicationName)")
-                                .font(.headline)
-                            Text("Cada \(Int(reminder.timeInterval / 3600)) horas por \(reminder.repeatCount / Int(24 / (reminder.timeInterval / 3600))) días")
-                                .font(.subheadline)
-                        } else {
-                            Text("Medicamento no encontrado").font(.caption)
+                    NavigationLink(destination: ReminderDetailView(reminder: reminder)) {
+                        VStack(alignment: .leading) {
+                            if let medicationName = getMedicationName(for: reminder.medicationId) {
+                                Text("\(reminder.dosage) - Suministrar: \(medicationName)")
+                                    .font(.headline)
+                                Text("Cada \(Int(reminder.timeInterval / 3600)) horas por \(reminder.repeatCount / Int(24 / (reminder.timeInterval / 3600))) días")
+                                    .font(.subheadline)
+                            } else {
+                                Text("Medicamento no encontrado").font(.caption)
+                            }
                         }
                     }
                 }
