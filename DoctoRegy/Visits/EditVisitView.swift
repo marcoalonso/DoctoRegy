@@ -18,27 +18,47 @@ struct EditVisitView: View {
     var body: some View {
         Form {
             Section(header: Text("Visit Details")) {
-                DatePicker("Date", selection: $visit.date, displayedComponents: .date)
+                DatePicker("Date Visit", selection: $visit.date, displayedComponents: .date)
                 TextField("Doctor Name", text: $visit.doctorName)
                 TextField("Diagnosis", text: $visit.diagnosis)
                 TextField("Amount Spent", value: $visit.amountSpent, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     .keyboardType(.decimalPad)
             }
-            Section {
-                Button("Save Changes") {
+            
+            Image("visit")
+                .resizable()
+                .scaledToFit()
+                .cornerRadius(18)
+                .padding()
+            
+            HStack {
+                Button {
                     saveVisit()
+                } label: {
+                    Text("Save")
+                        .foregroundColor(.white)
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background(Color.green)
+                        .cornerRadius(22) // Botón con forma circular
+                        .padding(.horizontal)
                 }
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .center)
-            }
-            Section {
+
                 Button(role: .destructive) {
                     showDeleteConfirmation = true
                 } label: {
-                    Text("Delete Visit")
+                    Text("Delete")
+                        .foregroundColor(.white)
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background(Color.red)
+                        .cornerRadius(22) // Botón con forma circular
+                        .padding(.horizontal)
                 }
-                .frame(maxWidth: .infinity, alignment: .center)
             }
+            .padding(.vertical)
+            
+            
         }
         .navigationTitle("Edit Visit")
         .navigationBarTitleDisplayMode(.inline)

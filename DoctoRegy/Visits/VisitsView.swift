@@ -20,18 +20,32 @@ struct VisitsView: View {
                 ForEach(filteredVisits) { visit in
                     NavigationLink(destination: EditVisitView(visit: visit)) {
                         VStack(alignment: .leading) {
-                            Text(visit.doctorName)
-                                .font(.headline)
-                            Text(visit.diagnosis)
-                                .font(.subheadline)
-                            Text("\(visit.date, formatter: Self.dateFormatter)")
-                                .font(.caption)
+                            HStack {
+                                Image(systemName: "person.crop.rectangle")
+                                
+                                Text("Dr. \(visit.doctorName)")
+                                    .font(.headline)
+                            }
+                            HStack {
+                                Image(systemName: "applepencil.and.scribble")
+                                
+                                Text("Diagnosis: \(visit.diagnosis)")
+                                    .font(.subheadline)
+                            }
+                            HStack {
+                                Image(systemName: "calendar.badge.exclamationmark")
+                                
+                                
+                                Text("\(visit.date, formatter: Self.dateFormatter)")
+                                    .font(.caption)
+                            }
                         }
                     }
                 }
                 .onDelete(perform: deleteVisit)
             }
             .navigationTitle("Doctor Visits")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 Button(action: { isAddingVisit = true }) {
                     Label("Add Visit", systemImage: "plus")
@@ -47,9 +61,11 @@ struct VisitsView: View {
     }
 
     var filteredVisits: [Visit] {
-        visits.filter { visit in
-            searchText.isEmpty || visit.doctorName.localizedCaseInsensitiveContains(searchText)
-        }
+        visits
+            .filter { visit in
+                searchText.isEmpty || visit.doctorName.localizedCaseInsensitiveContains(searchText)
+            }
+            .sorted(by: { $0.date > $1.date }) // Ordenar por fecha descendente
     }
 
     func deleteVisit(at offsets: IndexSet) {

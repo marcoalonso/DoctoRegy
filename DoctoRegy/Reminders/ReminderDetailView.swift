@@ -31,6 +31,7 @@ struct ReminderDetailView: View {
             .onDelete(perform: deleteNotification)
         }
         .navigationTitle("Reminder Details")
+        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             fetchPendingNotifications()
         }

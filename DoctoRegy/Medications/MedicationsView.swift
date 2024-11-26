@@ -20,18 +20,30 @@ struct MedicationsView: View {
                 ForEach(filteredMedications) { medication in
                     NavigationLink(destination: EditMedicationView(medication: medication)) {
                         VStack(alignment: .leading) {
-                            Text(medication.name)
-                                .font(.headline)
-                            Text("$\(String(format: "%.2f", medication.price))")
-                                .font(.subheadline)
-                            Text("\(medication.quantity)")
-                                .font(.caption)
+                            HStack {
+                                Image(systemName: "cross.vial")
+                                
+                                Text(medication.name)
+                                    .font(.headline)
+                            }
+                            HStack {
+                                Image(systemName: "dollarsign.circle")
+                                
+                                Text("\(String(format: "%.2f", medication.price))")
+                                    .font(.subheadline)
+                            }
+                            HStack {
+                                Image(systemName: "eyedropper.halffull")
+                                Text("\(medication.quantity)")
+                                    .font(.caption)
+                            }
                         }
                     }
                 }
                 .onDelete(perform: deleteMedication)
             }
             .navigationTitle("Medications")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 Button(action: { isAddingMedication = true }) {
                     Label("Add Medication", systemImage: "plus")

@@ -111,6 +111,7 @@ struct ExpensesView: View {
         }
         .padding()
         .navigationTitle("Expenses")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private var descripcionPeriodo: String {

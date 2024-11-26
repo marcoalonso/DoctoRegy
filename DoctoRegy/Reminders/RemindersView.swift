@@ -36,6 +36,7 @@ struct RemindersView: View {
                 printPendingNotifications()
             })
             .navigationTitle("Reminders")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 Button(action: { isAddingReminder = true }) {
                     Label("Add Reminder", systemImage: "plus")

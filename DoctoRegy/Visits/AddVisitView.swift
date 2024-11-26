@@ -29,6 +29,7 @@ struct AddVisitView: View {
                         .keyboardType(.decimalPad)
                 }
                 .navigationTitle("Add Visit")
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button("Cancel") {
