@@ -29,18 +29,16 @@ class Visit: Identifiable {
 class Medication: Identifiable {
     var id: UUID
     var name: String
-    var mainSubstance: String?
+    var price: Double // Cambiado de String a Double
     var quantity: String
     var expirationDate: Date
-    var photo: Data? // Almacena la imagen en formato Data
 
-    init(id: UUID = UUID(), name: String, mainSubstance: String?, quantity: String, expirationDate: Date, photo: Data? = nil) {
+    init(id: UUID = UUID(), name: String, price: Double, quantity: String, expirationDate: Date) {
         self.id = id
         self.name = name
-        self.mainSubstance = mainSubstance
+        self.price = price
         self.quantity = quantity
         self.expirationDate = expirationDate
-        self.photo = photo
     }
 }
 
@@ -75,7 +73,7 @@ class Recipe: Identifiable {
 class MockData {
     static let sampleMedication = Medication(
         name: "Ibuprofen",
-        mainSubstance: "Ibuprofen",
+        price: 300,
         quantity: "200ml",
         expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 30) // 30 días a partir de hoy
     )
@@ -88,9 +86,9 @@ class MockData {
         )
     
     static let medications: [Medication] = [
-           Medication(name: "Paracetamol", mainSubstance: "Acetaminophen", quantity: "500mg", expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 30)),
-           Medication(name: "Ibuprofen", mainSubstance: "Ibuprofen", quantity: "200mg", expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 60)),
-           Medication(name: "Sensidex", mainSubstance: "Dextromethorphan", quantity: "100ml", expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 90))
+        Medication(name: "Paracetamol", price: 200.98, quantity: "500mg", expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 30)),
+           Medication(name: "Ibuprofen", price: 250.4, quantity: "200mg", expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 60)),
+           Medication(name: "Sensidex", price: 300.56, quantity: "100ml", expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 90))
        ]
     
     static let sampleReminder = Reminder(

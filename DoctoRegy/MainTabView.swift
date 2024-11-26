@@ -22,9 +22,9 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Reminders", systemImage: "bell")
                 }
-            RecipesView()
+            ExpensesView()
                 .tabItem {
-                    Label("Recipes", systemImage: "rectangle.and.paperclip")
+                    Label("Expenses", systemImage: "chart.bar.fill")
                 }
         }
     }

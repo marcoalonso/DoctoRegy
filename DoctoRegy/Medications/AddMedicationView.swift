@@ -6,77 +6,72 @@
 //
 
 import SwiftUI
-import PhotosUI
 
 struct AddMedicationView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
-    @State private var mainSubstance: String? = nil
+    @State private var price = ""
     @State private var quantity = ""
     @State private var expirationDate = Date()
-    @State private var selectedPhoto: PhotosPickerItem? = nil
-    @State private var medicationPhoto: UIImage? = nil
 
     var onSave: (Medication) -> Void
 
     var body: some View {
         NavigationView {
-            Form {
-                TextField("Medication Name", text: $name)
-                TextField("Main Substance (Optional)", text: Binding(
-                    get: { mainSubstance ?? "" },
-                    set: { mainSubstance = $0.isEmpty ? nil : $0 }
-                ))
-                TextField("Quantity (e.g., 100ml, 10 pills)", text: $quantity)
-                DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
+            VStack {
+                Form {
+                    TextField("Medication Name", text: $name)
+                    
+                    // Campo para precio obligatorio
+                    TextField("$ Price (Required)", text: $price)
+                        .keyboardType(.decimalPad)
 
-                Section(header: Text("Photo")) {
-                    if let medicationPhoto {
-                        Image(uiImage: medicationPhoto)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 150)
+                    TextField("Quantity (e.g., 100ml, 10 pills)", text: $quantity)
+                    DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
+                }
+                
+                Image("medicina")
+                    .resizable()
+                    .scaledToFit()
+                    .padding(.horizontal, 24)
+                    .cornerRadius(18)
+                
+                .navigationTitle("Add Medication")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") { dismiss() }
                     }
-                    PhotosPicker("Select Photo", selection: $selectedPhoto, matching: .images)
-                        .onChange(of: selectedPhoto) { _, newItem in
-                            Task {
-                                if let data = try? await newItem?.loadTransferable(type: Data.self),
-                                   let image = UIImage(data: data) {
-                                    medicationPhoto = image
-                                }
-                            }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Save") {
+                            saveMedication()
                         }
-                }
-            }
-            .navigationTitle("Add Medication")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        saveMedication()
+                        .disabled(name.isEmpty || quantity.isEmpty || !isPriceValid)
                     }
-                    .disabled(name.isEmpty || quantity.isEmpty)
                 }
             }
         }
     }
 
+    // Validación de precio
+    var isPriceValid: Bool {
+        guard let priceValue = Double(price), priceValue > 0 else {
+            return false
+        }
+        return true
+    }
+
     func saveMedication() {
-        let photoData = medicationPhoto?.jpegData(compressionQuality: 0.8)
         let newMedication = Medication(
             name: name,
-            mainSubstance: mainSubstance,
+            price: Double(price) ?? 0.0,
             quantity: quantity,
-            expirationDate: expirationDate,
-            photo: photoData
+            expirationDate: expirationDate
         )
         onSave(newMedication)
         dismiss()
     }
 }
-
 
 #Preview {
     AddMedicationView { medication in

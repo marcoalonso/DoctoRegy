@@ -19,10 +19,11 @@ struct EditMedicationView: View {
         Form {
             Section(header: Text("Medication Details")) {
                 TextField("Name", text: $medication.name)
-                TextField("Main Substance (Optional)", text: Binding(
-                    get: { medication.mainSubstance ?? "" },
-                    set: { medication.mainSubstance = $0.isEmpty ? nil : $0 }
-                ))
+                TextField("Price (Optional)", value: Binding(
+                    get: { medication.price }, // Accede al valor de Double
+                    set: { medication.price = $0 } // Guarda directamente el Double
+                ), format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                .keyboardType(.decimalPad)
                 TextField("Quantity (e.g., 100ml, 10 pills)", text: $medication.quantity)
                 DatePicker("Expiration Date", selection: $medication.expirationDate, displayedComponents: .date)
             }

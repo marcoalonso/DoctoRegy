@@ -22,10 +22,8 @@ struct MedicationsView: View {
                         VStack(alignment: .leading) {
                             Text(medication.name)
                                 .font(.headline)
-                            if let substance = medication.mainSubstance {
-                                Text(substance)
-                                    .font(.subheadline)
-                            }
+                            Text("$\(String(format: "%.2f", medication.price))")
+                                .font(.subheadline)
                             Text("\(medication.quantity)")
                                 .font(.caption)
                         }

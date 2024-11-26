@@ -12,34 +12,50 @@ struct AddVisitView: View {
     @State private var date = Date()
     @State private var doctorName = ""
     @State private var diagnosis = ""
-    @State private var amountSpent: Double = 0.0
+    @State private var amountSpent: String = "" // Cambiamos a String para manejar el placeholder
 
     var onSave: (Visit) -> Void
 
     var body: some View {
         NavigationView {
-            Form {
-                DatePicker("Date", selection: $date, displayedComponents: .date)
-                TextField("Doctor Name", text: $doctorName)
-                TextField("Diagnosis", text: $diagnosis)
-                TextField("Amount Spent", value: $amountSpent, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                    .keyboardType(.decimalPad)
-            }
-            .navigationTitle("Add Visit")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
+            VStack {
+                Form {
+                    DatePicker("Date", selection: $date, displayedComponents: .date)
+                    TextField("Doctor Name", text: $doctorName)
+                    TextField("Diagnosis", text: $diagnosis)
+                    
+                    // TextField con un placeholder para "Amount Spent"
+                    TextField("$ Amount Spent", text: $amountSpent)
+                        .keyboardType(.decimalPad)
+                }
+                .navigationTitle("Add Visit")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            dismiss()
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Save") {
+                            saveVisit()
+                        }
+                        .disabled(doctorName.isEmpty || diagnosis.isEmpty || !isAmountValid)
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        saveVisit()
-                    }
-                    .disabled(doctorName.isEmpty || diagnosis.isEmpty)
-                }
+                Image("pediatra")
+                    .resizable()
+                    .cornerRadius(18)
+                    .padding(.horizontal, 24)
             }
         }
+    }
+
+    var isAmountValid: Bool {
+        // Validar que amountSpent sea un número decimal positivo
+        if let value = Double(amountSpent), value >= 0 {
+            return true
+        }
+        return false
     }
 
     func saveVisit() {
@@ -47,7 +63,7 @@ struct AddVisitView: View {
             date: date,
             doctorName: doctorName,
             diagnosis: diagnosis,
-            amountSpent: amountSpent
+            amountSpent: Double(amountSpent) ?? 0.0 // Convierte a Double al guardar
         )
         onSave(newVisit)
         dismiss()
