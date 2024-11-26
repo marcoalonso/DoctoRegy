@@ -20,7 +20,7 @@ struct RemindersView: View {
                     NavigationLink(destination: ReminderDetailView(reminder: reminder)) {
                         VStack(alignment: .leading) {
                             if let medicationName = getMedicationName(for: reminder.medicationId) {
-                                Text("\(reminder.dosage) - Suministrar: \(medicationName)")
+                                Text("Suministrar: \(reminder.dosage) de  \(medicationName)")
                                     .font(.headline)
                                 Text("Cada \(Int(reminder.timeInterval / 3600)) horas por \(reminder.repeatCount / Int(24 / (reminder.timeInterval / 3600))) días")
                                     .font(.subheadline)
@@ -128,7 +128,7 @@ struct RemindersView: View {
             }
             
             let content = UNMutableNotificationContent()
-            content.title = "\(reminder.dosage) - Suministrar: \(medicationName)"
+            content.title = "Suministrar: \(reminder.dosage) de \(medicationName)"
             content.body = "Es hora de tomar tu medicamento."
             content.sound = UNNotificationSound.default
             

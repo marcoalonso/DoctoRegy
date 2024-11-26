@@ -22,6 +22,10 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Reminders", systemImage: "bell")
                 }
+            RecipesView()
+                .tabItem {
+                    Label("Recipes", systemImage: "rectangle.and.paperclip")
+                }
         }
     }
 }

@@ -32,13 +32,15 @@ class Medication: Identifiable {
     var mainSubstance: String?
     var quantity: String
     var expirationDate: Date
+    var photo: Data? // Almacena la imagen en formato Data
 
-    init(id: UUID = UUID(), name: String, mainSubstance: String?, quantity: String, expirationDate: Date) {
+    init(id: UUID = UUID(), name: String, mainSubstance: String?, quantity: String, expirationDate: Date, photo: Data? = nil) {
         self.id = id
         self.name = name
         self.mainSubstance = mainSubstance
         self.quantity = quantity
         self.expirationDate = expirationDate
+        self.photo = photo
     }
 }
 
@@ -56,6 +58,17 @@ class Reminder: Identifiable {
         self.dosage = dosage
         self.timeInterval = timeInterval
         self.repeatCount = repeatCount
+    }
+}
+
+@Model
+class Recipe: Identifiable {
+    var id: UUID
+    var photo: Data
+
+    init(id: UUID = UUID(), photo: Data) {
+        self.id = id
+        self.photo = photo
     }
 }
 

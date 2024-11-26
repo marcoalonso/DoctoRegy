@@ -32,7 +32,6 @@ struct AddReminderView: View {
 
                 Section(header: Text("Dosage")) {
                     TextField("Dosage (e.g., 2.5 ml)", text: $dosage)
-                        .keyboardType(.decimalPad)
                 }
 
                 Section(header: Text("Frequency")) {

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct AddMedicationView: View {
     @Environment(\.dismiss) private var dismiss
@@ -13,6 +14,8 @@ struct AddMedicationView: View {
     @State private var mainSubstance: String? = nil
     @State private var quantity = ""
     @State private var expirationDate = Date()
+    @State private var selectedPhoto: PhotosPickerItem? = nil
+    @State private var medicationPhoto: UIImage? = nil
 
     var onSave: (Medication) -> Void
 
@@ -26,13 +29,29 @@ struct AddMedicationView: View {
                 ))
                 TextField("Quantity (e.g., 100ml, 10 pills)", text: $quantity)
                 DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
+
+                Section(header: Text("Photo")) {
+                    if let medicationPhoto {
+                        Image(uiImage: medicationPhoto)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 150)
+                    }
+                    PhotosPicker("Select Photo", selection: $selectedPhoto, matching: .images)
+                        .onChange(of: selectedPhoto) { _, newItem in
+                            Task {
+                                if let data = try? await newItem?.loadTransferable(type: Data.self),
+                                   let image = UIImage(data: data) {
+                                    medicationPhoto = image
+                                }
+                            }
+                        }
+                }
             }
             .navigationTitle("Add Medication")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
@@ -45,16 +64,19 @@ struct AddMedicationView: View {
     }
 
     func saveMedication() {
+        let photoData = medicationPhoto?.jpegData(compressionQuality: 0.8)
         let newMedication = Medication(
             name: name,
             mainSubstance: mainSubstance,
             quantity: quantity,
-            expirationDate: expirationDate
+            expirationDate: expirationDate,
+            photo: photoData
         )
         onSave(newMedication)
         dismiss()
     }
 }
+
 
 #Preview {
     AddMedicationView { medication in
