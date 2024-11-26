@@ -12,7 +12,8 @@ struct AddMedicationView: View {
     @State private var name = ""
     @State private var price = ""
     @State private var quantity = ""
-    @State private var purchaseDate = Date() // Cambiado a fecha de compra
+    @State private var purchaseDate = Date() // Fecha de compra
+    @State private var expirationDate = Date() // Fecha de caducidad
 
     var onSave: (Medication) -> Void
 
@@ -28,8 +29,11 @@ struct AddMedicationView: View {
 
                     TextField("Quantity (e.g., 100ml, 10 pills)", text: $quantity)
 
-                    // Cambiado a fecha de compra
+                    // Selector para la fecha de compra
                     DatePicker("Purchase Date", selection: $purchaseDate, displayedComponents: .date)
+
+                    // Selector para la fecha de caducidad
+                    DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
                 }
                 
                 Image("medicina")
@@ -68,7 +72,8 @@ struct AddMedicationView: View {
             name: name,
             price: Double(price) ?? 0.0,
             quantity: quantity,
-            expirationDate: purchaseDate // Actualizado para usar la fecha de compra
+            purchaseDate: purchaseDate, // Usar la fecha seleccionada de compra
+            expirationDate: expirationDate // Usar la fecha seleccionada de caducidad
         )
         onSave(newMedication)
         dismiss()

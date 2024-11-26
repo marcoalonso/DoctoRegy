@@ -4,7 +4,6 @@
 //
 //  Created by Marco Alonso Rodriguez on 25/11/24.
 //
-
 import SwiftUI
 import SwiftData
 
@@ -20,21 +19,27 @@ struct EditMedicationView: View {
             Form {
                 Section(header: Text("Medication Details")) {
                     TextField("Name", text: $medication.name)
-                    TextField("Price (Optional)", value: Binding(
-                        get: { medication.price }, // Accede al valor de Double
-                        set: { medication.price = $0 } // Guarda directamente el Double
+                    TextField("Price", value: Binding(
+                        get: { medication.price },
+                        set: { medication.price = $0 }
                     ), format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     .keyboardType(.decimalPad)
+
                     TextField("Quantity (e.g., 100ml, 10 pills)", text: $medication.quantity)
-                    DatePicker("Expiration Date", selection: $medication.purchaseDate, displayedComponents: .date)
+
+                    // Campo para fecha de compra
+                    DatePicker("Purchase Date", selection: $medication.purchaseDate, displayedComponents: .date)
+
+                    // Campo para fecha de caducidad
+                    DatePicker("Expiration Date", selection: $medication.expirationDate, displayedComponents: .date)
                 }
-                
             }
+
             Image("medicamento")
                 .resizable()
                 .scaledToFit()
                 .cornerRadius(24)
-            
+
             HStack {
                 Button(action: saveMedication) {
                     Text("Save")
@@ -42,7 +47,7 @@ struct EditMedicationView: View {
                         .fontWeight(.bold)
                         .frame(maxWidth: .infinity, minHeight: 44)
                         .background(Color.green)
-                        .cornerRadius(22) // Botón con forma circular
+                        .cornerRadius(22)
                         .padding(.horizontal)
                 }
 
@@ -54,12 +59,11 @@ struct EditMedicationView: View {
                         .fontWeight(.bold)
                         .frame(maxWidth: .infinity, minHeight: 44)
                         .background(Color.red)
-                        .cornerRadius(22) // Botón con forma circular
+                        .cornerRadius(22)
                         .padding(.horizontal)
                 }
             }
             .padding(.vertical)
-            
             .navigationTitle("Edit Medication")
             .navigationBarTitleDisplayMode(.inline)
             .confirmationDialog(

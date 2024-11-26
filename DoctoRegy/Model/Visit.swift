@@ -29,16 +29,18 @@ class Visit: Identifiable {
 class Medication: Identifiable {
     var id: UUID
     var name: String
-    var price: Double // Cambiado de String a Double
+    var price: Double
     var quantity: String
-    var purchaseDate: Date
+    var purchaseDate: Date // Nueva propiedad: Fecha de compra
+    var expirationDate: Date // Nueva propiedad: Fecha de expiración
 
-    init(id: UUID = UUID(), name: String, price: Double, quantity: String, expirationDate: Date) {
+    init(id: UUID = UUID(), name: String, price: Double, quantity: String, purchaseDate: Date, expirationDate: Date) {
         self.id = id
         self.name = name
         self.price = price
         self.quantity = quantity
-        self.purchaseDate = expirationDate
+        self.purchaseDate = purchaseDate // Inicializar fecha de compra
+        self.expirationDate = expirationDate // Inicializar fecha de expiración
     }
 }
 
@@ -75,7 +77,7 @@ class MockData {
         name: "Ibuprofen",
         price: 300,
         quantity: "200ml",
-        expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 30) // 30 días a partir de hoy
+        purchaseDate: Date(), expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 30) // 30 días a partir de hoy
     )
     
     static let sampleVisit = Visit(
@@ -86,9 +88,13 @@ class MockData {
         )
     
     static let medications: [Medication] = [
-        Medication(name: "Paracetamol", price: 200.98, quantity: "500mg", expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 30)),
-           Medication(name: "Ibuprofen", price: 250.4, quantity: "200mg", expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 60)),
-           Medication(name: "Sensidex", price: 300.56, quantity: "100ml", expirationDate: Date().addingTimeInterval(60 * 60 * 24 * 90))
+        Medication(
+            name: "Aspirin",
+            price: 10.5,
+            quantity: "100 pills",
+            purchaseDate: Date(), // Fecha de compra
+            expirationDate: Calendar.current.date(byAdding: .month, value: 12, to: Date())! // Fecha de expiración
+        ),
        ]
     
     static let sampleReminder = Reminder(
