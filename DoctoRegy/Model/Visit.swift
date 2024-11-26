@@ -31,14 +31,14 @@ class Medication: Identifiable {
     var name: String
     var price: Double // Cambiado de String a Double
     var quantity: String
-    var expirationDate: Date
+    var purchaseDate: Date
 
     init(id: UUID = UUID(), name: String, price: Double, quantity: String, expirationDate: Date) {
         self.id = id
         self.name = name
         self.price = price
         self.quantity = quantity
-        self.expirationDate = expirationDate
+        self.purchaseDate = expirationDate
     }
 }
 

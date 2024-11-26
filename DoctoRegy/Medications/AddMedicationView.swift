@@ -12,7 +12,7 @@ struct AddMedicationView: View {
     @State private var name = ""
     @State private var price = ""
     @State private var quantity = ""
-    @State private var expirationDate = Date()
+    @State private var purchaseDate = Date() // Cambiado a fecha de compra
 
     var onSave: (Medication) -> Void
 
@@ -27,7 +27,9 @@ struct AddMedicationView: View {
                         .keyboardType(.decimalPad)
 
                     TextField("Quantity (e.g., 100ml, 10 pills)", text: $quantity)
-                    DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
+
+                    // Cambiado a fecha de compra
+                    DatePicker("Purchase Date", selection: $purchaseDate, displayedComponents: .date)
                 }
                 
                 Image("medicina")
@@ -66,7 +68,7 @@ struct AddMedicationView: View {
             name: name,
             price: Double(price) ?? 0.0,
             quantity: quantity,
-            expirationDate: expirationDate
+            expirationDate: purchaseDate // Actualizado para usar la fecha de compra
         )
         onSave(newMedication)
         dismiss()

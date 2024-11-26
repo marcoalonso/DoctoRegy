@@ -25,7 +25,7 @@ struct EditMedicationView: View {
                 ), format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                 .keyboardType(.decimalPad)
                 TextField("Quantity (e.g., 100ml, 10 pills)", text: $medication.quantity)
-                DatePicker("Expiration Date", selection: $medication.expirationDate, displayedComponents: .date)
+                DatePicker("Expiration Date", selection: $medication.purchaseDate, displayedComponents: .date)
             }
             Section {
                 Button("Save Changes") {

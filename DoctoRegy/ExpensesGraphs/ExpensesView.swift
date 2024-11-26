@@ -12,112 +12,205 @@ import Charts
 struct ExpensesView: View {
     @Query var visits: [Visit]
     @Query var medications: [Medication]
-    @State private var selectedFilter: TimeFilter = .month
+    @State private var tipoGrafico: TipoGrafico = .dona
+    @State private var filtroSeleccionado: TimeFilter = .dia
+    @State private var fechaReferencia: Date = Date()
 
-    var body: some View {
-        NavigationView {
-            VStack {
-                Form {
-                    Section(header: Text("Filter by Time")) {
-                        Picker("Filter", selection: $selectedFilter) {
-                            ForEach(TimeFilter.allCases, id: \.self) { filter in
-                                Text(filter.rawValue.capitalized).tag(filter)
-                            }
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
-                    }
-                }
-
-                // Gráfico circular de gastos
-                pieChart
-                    .frame(height: 300)
-                    .padding()
-
-                Spacer()
-            }
-            .navigationTitle("Expenses")
-        }
+    private var dynamicHeight: CGFloat {
+        let screenHeight = UIScreen.main.bounds.height
+        return screenHeight * 0.6
     }
 
-    // Gráfico circular
-    private var pieChart: some View {
-        Chart {
-            ForEach(categorySummaries, id: \.category) { summary in
-                BarMark(
-                    x: .value("Category", summary.category.rawValue.capitalized),
-                    y: .value("Amount", summary.totalSpent)
-                )
-                .foregroundStyle(by: .value("Category", summary.category.rawValue.capitalized))
-                .cornerRadius(5)
+    private var gastosFiltradosYAgrupados: [CategoriaGasto] {
+        let calendar = Calendar.current
+
+        // Filtrar y procesar visitas
+        let visitasFiltradas = visits.filter { visit in
+            switch filtroSeleccionado {
+            case .dia:
+                return calendar.isDate(visit.date, inSameDayAs: fechaReferencia)
+            case .semana:
+                return calendar.isDate(visit.date, equalTo: fechaReferencia, toGranularity: .weekOfYear)
+            case .mes:
+                return calendar.isDate(visit.date, equalTo: fechaReferencia, toGranularity: .month)
+            case .anio:
+                return calendar.isDate(visit.date, equalTo: fechaReferencia, toGranularity: .year)
             }
         }
-    }
+        .reduce(0.0) { $0 + $1.amountSpent }
 
-    // Filtro dinámico para gastos
-    var filteredExpenses: [Expense] {
-        let allExpenses: [Expense] = visits.map {
-            Expense(id: $0.id, date: $0.date, category: .consultation, amountSpent: $0.amountSpent)
-        } + medications.map {
-            Expense(id: $0.id, date: $0.expirationDate, category: .medication, amountSpent: $0.price)
+        // Filtrar y procesar medicamentos
+        let medicamentosFiltrados = medications.filter { medication in
+            switch filtroSeleccionado {
+            case .dia:
+                return calendar.isDate(medication.purchaseDate, inSameDayAs: fechaReferencia)
+            case .semana:
+                return calendar.isDate(medication.purchaseDate, equalTo: fechaReferencia, toGranularity: .weekOfYear)
+            case .mes:
+                return calendar.isDate(medication.purchaseDate, equalTo: fechaReferencia, toGranularity: .month)
+            case .anio:
+                return calendar.isDate(medication.purchaseDate, equalTo: fechaReferencia, toGranularity: .year)
+            }
         }
+        .reduce(0.0) { $0 + $1.price }
 
-        return allExpenses.filter { expense in
-            Calendar.current.isDate(expense.date, equalTo: Date(), toGranularity: selectedFilter.calendarComponent)
-        }
-    }
-
-    // Resumen de gastos por categoría para el gráfico circular
-    var categorySummaries: [CategorySummary] {
-        let consultationTotal = filteredExpenses
-            .filter { $0.category == .consultation }
-            .reduce(0.0) { $0 + $1.amountSpent }
-
-        let medicationTotal = filteredExpenses
-            .filter { $0.category == .medication }
-            .reduce(0.0) { $0 + $1.amountSpent }
-
+        // Crear datos para el gráfico
         return [
-            CategorySummary(category: .consultation, totalSpent: consultationTotal),
-            CategorySummary(category: .medication, totalSpent: medicationTotal)
+            CategoriaGasto(categoria: "Consultation", total: visitasFiltradas),
+            CategoriaGasto(categoria: "Medication", total: medicamentosFiltrados)
         ]
     }
+
+    var body: some View {
+        VStack {
+            Picker("Filtrar por", selection: $filtroSeleccionado) {
+                ForEach(TimeFilter.allCases, id: \.self) { filtro in
+                    Text(filtro.rawValue.capitalized).tag(filtro)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding()
+
+            HStack {
+                Button(action: mostrarPeriodoAnterior) {
+                    Label("", systemImage: "chevron.left")
+                }
+
+                Spacer()
+
+                Text(descripcionPeriodo)
+                    .font(.headline)
+                    .foregroundColor(.gray)
+
+                Spacer()
+
+                if !esPeriodoActual {
+                    Button(action: mostrarPeriodoPosterior) {
+                        Label("", systemImage: "chevron.right")
+                    }
+                }
+            }
+            .padding(.horizontal)
+
+            Picker("Tipo de gráfico", selection: $tipoGrafico) {
+                ForEach(TipoGrafico.allCases, id: \.self) { tipo in
+                    Text(tipo.titulo).tag(tipo)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding()
+
+            switch tipoGrafico {
+            case .dona:
+                GraficoDona(gastos: gastosFiltradosYAgrupados, height: dynamicHeight)
+            case .barras:
+                GraficoBarras(gastos: gastosFiltradosYAgrupados, height: dynamicHeight)
+            }
+
+            Spacer()
+        }
+        .padding()
+        .navigationTitle("Expenses")
+    }
+
+    private var descripcionPeriodo: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "es_ES")
+
+        switch filtroSeleccionado {
+        case .dia:
+            formatter.dateFormat = "d 'de' MMMM"
+            return formatter.string(from: fechaReferencia)
+        case .semana:
+            let startOfWeek = Calendar.current.date(from: Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: fechaReferencia))!
+            let endOfWeek = Calendar.current.date(byAdding: .day, value: 6, to: startOfWeek)!
+            formatter.dateFormat = "d MMM"
+            return "\(formatter.string(from: startOfWeek)) - \(formatter.string(from: endOfWeek))"
+        case .mes:
+            formatter.dateFormat = "MMMM yyyy"
+            return formatter.string(from: fechaReferencia)
+        case .anio:
+            formatter.dateFormat = "yyyy"
+            return formatter.string(from: fechaReferencia)
+        }
+    }
+
+    private var esPeriodoActual: Bool {
+        let calendar = Calendar.current
+        switch filtroSeleccionado {
+        case .dia:
+            return calendar.isDateInToday(fechaReferencia)
+        case .semana:
+            return calendar.isDate(fechaReferencia, equalTo: Date(), toGranularity: .weekOfYear)
+        case .mes:
+            return calendar.isDate(fechaReferencia, equalTo: Date(), toGranularity: .month)
+        case .anio:
+            return calendar.isDate(fechaReferencia, equalTo: Date(), toGranularity: .year)
+        }
+    }
+
+    private func mostrarPeriodoAnterior() {
+        let calendar = Calendar.current
+        switch filtroSeleccionado {
+        case .dia:
+            fechaReferencia = calendar.date(byAdding: .day, value: -1, to: fechaReferencia) ?? fechaReferencia
+        case .semana:
+            fechaReferencia = calendar.date(byAdding: .weekOfYear, value: -1, to: fechaReferencia) ?? fechaReferencia
+        case .mes:
+            fechaReferencia = calendar.date(byAdding: .month, value: -1, to: fechaReferencia) ?? fechaReferencia
+        case .anio:
+            fechaReferencia = calendar.date(byAdding: .year, value: -1, to: fechaReferencia) ?? fechaReferencia
+        }
+    }
+
+    private func mostrarPeriodoPosterior() {
+        let calendar = Calendar.current
+        switch filtroSeleccionado {
+        case .dia:
+            fechaReferencia = calendar.date(byAdding: .day, value: 1, to: fechaReferencia) ?? fechaReferencia
+        case .semana:
+            fechaReferencia = calendar.date(byAdding: .weekOfYear, value: 1, to: fechaReferencia) ?? fechaReferencia
+        case .mes:
+            fechaReferencia = calendar.date(byAdding: .month, value: 1, to: fechaReferencia) ?? fechaReferencia
+        case .anio:
+            fechaReferencia = calendar.date(byAdding: .year, value: 1, to: fechaReferencia) ?? fechaReferencia
+        }
+    }
 }
 
-// Modelo auxiliar para el gráfico circular
-struct CategorySummary {
-    let category: ExpenseCategory
-    let totalSpent: Double
+// Estructura para representar el total por categoría
+struct CategoriaGasto: Identifiable {
+    let id = UUID()
+    let categoria: String
+    let total: Double
 }
 
-// Modelo auxiliar para los datos de gastos
-struct Expense: Identifiable {
-    let id: UUID
-    let date: Date
-    let category: ExpenseCategory
-    let amountSpent: Double
-}
+enum TipoGrafico: String, CaseIterable {
+    case dona
+    case barras
 
-enum ExpenseCategory: String, CaseIterable {
-    case consultation
-    case medication
+    var titulo: String {
+        switch self {
+        case .dona: return "Dona"
+        case .barras: return "Barras"
+        }
+    }
 }
 
 enum TimeFilter: String, CaseIterable {
-    case day
-    case week
-    case month
-    case year
+    case dia
+    case semana
+    case mes
+    case anio
 
     var calendarComponent: Calendar.Component {
         switch self {
-        case .day: return .day
-        case .week: return .weekOfYear
-        case .month: return .month
-        case .year: return .year
+        case .dia: return .day
+        case .semana: return .weekOfYear
+        case .mes: return .month
+        case .anio: return .year
         }
     }
 }
 
-#Preview {
-    ExpensesView()
-}
+
